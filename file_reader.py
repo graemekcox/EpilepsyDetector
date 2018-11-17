@@ -2,8 +2,6 @@ import pyedflib
 import numpy as np
 import matplotlib.pyplot as plt
 
-fn = "/Users/graemecox/Documents/ChildSeizure/chb01/chb01_03.edf"
-
 def read_edf(fn):
     f = pyedflib.EdfReader(fn)
     n = f.signals_in_file
@@ -12,19 +10,102 @@ def read_edf(fn):
     for i in np.arange(n):
         data[i, :] = f.readSignal(i)
 
-    fs = 256  # Hz
 
-    print("Length = " + str(1 / fs * data.shape[1]))
+
+    # print("Length = " + str(1 / int(fs) * data.shape[1]))
 
     print(data.shape)
+    #
+    # seiz_start = 2996
+    # seiz_end = 3036
+    # seiz_data = data[:, seiz_start * fs:seiz_end * fs]
+    # print(seiz_data.shape)
+    return data
 
-    seiz_start = 2996
-    seiz_end = 3036
-    seiz_data = data[:, seiz_start * fs:seiz_end * fs]
+
+def text_reader(fn):
+
+    lines = [line.rstrip('\n') for line in open(fn)]
+
+    seizure_dict = {}
+    patient_dict = {}
+
+    # for line in lines:
+    line_ind = 0
+
+
+    while line_ind < len(lines):
+
+        line = lines[line_ind]
+        # print(line)
+        if "Data Sampling Rate" in line:
+            fs = int(line.split(': ')[1].split(' ')[0])
+
+
+        if 'File Name' in line:
+            id = line.split(': ')[1]
+            patient_dict[id] = {'start_time':0, 'end_time':0, 'num_seiz':0}
+            # print(patient_dict[id])
+
+            line_ind += 1
+            line = lines[line_ind]
+            # Set end time
+            patient_dict[id]['start_time'] = line.split(': ')[1]
+
+            line_ind += 1
+            line = lines[line_ind]
+            # Set end time
+            patient_dict[id]['end_time'] = line.split(': ')[1]
+
+            line_ind += 1
+            line = lines[line_ind]
+            # print(line)
+            #
+            # # Get number of seiz
+            seiz_num = int(line.split(': ')[1])
+
+            if (seiz_num != 0):
+                print('Seziure in id = '+id)
+
+                seizure_dict[id] = {'start_time': [], 'end_time': []}
+                for i in range(seiz_num):
+
+                    line_ind += 1
+                    line = lines[line_ind]
+
+                    seizure_dict[id]['start_time'].append(line.split(': ')[1].split(' ')[0])
+
+                    line_ind += 1
+                    line = lines[line_ind]
+
+                    seizure_dict[id]['end_time'].append(line.split(': ')[1].split(' ')[0])
+
+        line_ind += 1
+        # def check_file(line):
+    return seizure_dict, fs
+
+
+fn = "/Users/graemecox/Documents/ChildSeizure/chb01/chb01_03.edf"
+summary_txt = "/Users/graemecox/Documents/ChildSeizure/chb01/chb01-summary.txt"
+
+seiz_dict, fs = text_reader(summary_txt)
+
+eeg_data = read_edf(fn)
+
+print(seiz_dict.keys)
+for key in seiz_dict:
+    #assume only 1 seizure for now
+    start_time = int(seiz_dict[key]['start_time'][0])
+    end_time   = int((seiz_dict[key]['end_time'][0]))
+
+    seiz_data = eeg_data[:, start_time*fs:end_time *fs]
     print(seiz_data.shape)
 
 
-read_edf(fn)
+
+
+
+# read_edf(fn)
 # plt.subplot(2,2,1)
 # plt.plot(seiz_data[0,:])
 #
