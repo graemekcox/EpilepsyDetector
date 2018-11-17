@@ -14,7 +14,7 @@ def read_edf(fn):
 
     # print("Length = " + str(1 / int(fs) * data.shape[1]))
 
-    print(data.shape)
+    # print(data.shape)
     #
     # seiz_start = 2996
     # seiz_end = 3036
