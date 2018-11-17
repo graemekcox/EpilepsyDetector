@@ -85,21 +85,7 @@ def text_reader(fn):
     return seizure_dict, fs
 
 
-fn = "/Users/graemecox/Documents/ChildSeizure/chb01/chb01_03.edf"
-summary_txt = "/Users/graemecox/Documents/ChildSeizure/chb01/chb01-summary.txt"
 
-seiz_dict, fs = text_reader(summary_txt)
-
-eeg_data = read_edf(fn)
-
-print(seiz_dict.keys)
-for key in seiz_dict:
-    #assume only 1 seizure for now
-    start_time = int(seiz_dict[key]['start_time'][0])
-    end_time   = int((seiz_dict[key]['end_time'][0]))
-
-    seiz_data = eeg_data[:, start_time*fs:end_time *fs]
-    print(seiz_data.shape)
 
 
 
