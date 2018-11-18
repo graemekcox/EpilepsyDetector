@@ -15,11 +15,14 @@ seiz_dict, fs = text_reader(summary_txt)
 
 i = 0
 
-key = 'chb01_03.edf'
+# key = 'chb01_03.edf'
 
 ##C4-P4 (channel 10) T8-p8 (channel 15)
 
 ##### Prep all input data
+window_size = 2 * fs
+X = np.empty((0, window_size))
+labels = np.empty((0))
 
 for key in seiz_dict.keys():
     print('-----------------' + key + '----------------')
@@ -35,18 +38,30 @@ for key in seiz_dict.keys():
 # print('-------Original shape--------')
 # print(c4_p4.shape)
 # print('-------Start adding other shapes------')
-    epoch_size = 2*fs
-    epochs = np.empty((0, epoch_size))
-    labels = np.empty((0))
 
-    temp_epoch, temp_labels = append_epochs(c4_p4, start_time, end_time, fs)
+
+
+
+    temp_x, temp_labels = append_epochs(c4_p4, start_time, end_time, fs)
 
 
     # epochs = np.append(epochs, temp_labels, axis=0)
     # labels = np.append(labels, temp_labels, axis=0)
-    epochs = np.append(epochs, temp_epoch, axis=0)
+    X = np.append(X, temp_x, axis=0)
     labels = np.append(labels, temp_labels, axis=0)
+
+    print(X.shape)
+
+    # X = np.append()
 
 
 print('-------- Final Size ---------')
-print(epochs.shape, labels.shape)
+print(X.shape, labels.shape)
+
+
+print('--------- Unique values ---------')
+unique, counts = np.unique(labels, return_counts=True)
+print(np.asarray((unique, counts)).T)
+
+np.save('X.npy', X)
+np.save('labels.npy',labels)
