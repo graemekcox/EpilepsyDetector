@@ -19,7 +19,33 @@ def get_data_epochs(data, epoch_size, is_seizure=0):
     else:
         y = np.ones(epochs.shape[0])
 
-    print(y.shape, epochs.shape)
+    # print(y.shape, epochs.shape)
 
     return epochs, y
 
+
+
+def append_epochs(data, start_time, end_time, fs):
+    epoch_size = fs*2
+
+    epochs = np.empty((0, epoch_size))
+    labels = np.empty((0))
+
+    # add data before seizure
+    temp_epochs, temp_y = get_data_epochs(data[:start_time * fs], epoch_size, 0)
+    epochs = np.append(epochs, temp_epochs, axis=0)
+    labels = np.append(labels, temp_y, axis=0)
+
+    # add data after seizure
+    temp_epochs, temp_y = get_data_epochs(data[end_time * fs:], epoch_size, 0)
+    epochs = np.append(epochs, temp_epochs, axis=0)
+    labels = np.append(labels, temp_y, axis=0)
+
+    # add seizure data
+    seiz_data = data[start_time * fs:end_time * fs]
+    temp_epochs, temp_y = get_data_epochs(seiz_data, epoch_size, 1)
+    epochs = np.append(epochs, temp_epochs, axis=0)
+    labels = np.append(labels, temp_y, axis=0)
+
+    print("appeneded epochs")
+    return epochs, labels
